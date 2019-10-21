@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Baidu Tile</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var resolutions = []; //分辨率数组
+        var tileSize = 256; //瓦片大小
+        var extent = [12665080.52765571, 2550703.6338763316, 12725465.780000998, 2601457.820657688]; //深圳地区
+        var projection = new ol.proj.get('EPSG:3857'); //获得对应的投影坐标系
+        var projectionExtent = projection.getExtent(); //投影坐标系的范围
+        //初始化分辨率数组
+        for (var i = 0; i < 19; i++) {
+            resolutions[i] = Math.pow(2, 18 - i);
+        }
+        var tileGrid = new ol.tilegrid.TileGrid({
+            //投影坐标系范围的左上角为瓦片坐标系原点
+            origin: [0,0], /*百度瓦片地图规则如下：origin在[0,0]，X轴从左至右递增，Y轴从下往上递增（从左下角到右上角，与Openlayers默认设置相同）。*/
+            resolutions: resolutions,
+            extent:projectionExtent,
+            tileSize: [256, 256]
+        });
+
+        let map = new ol.Map({
+            target: 'map',
+            layers: [
+            new ol.layer.Tile({
+                    source: new ol.source.TileImage({
+                        projection: projection,
+                        tileGrid: tileGrid,
+                        tileUrlFunction: function(xyz){
+                            if(!xyz){
+                                return "";
+                            }
+                            var z = xyz[0];
+                            var x = xyz[1];
+                            var y = xyz[2];
+                            // 百度使用M来代表负号，所以需要调整
+                            if(x < 0){
+                                x = 'M' + (-x);
+                            }
+                            if(y < 0){
+                                y = "M" + (-y);
+                            }
+                            return "http://online3.map.bdimg.com/tile/?qt=tile&x=" + x + "&y=" + y + "&z=" + z + "&styles=pl&udt=20141119&scaler=1";  
+                        }
+                    })
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.transform([104.06, 30.67], 'EPSG:4326', 'EPSG:3857'),
+                resolutions: resolutions,
+                zoom: 10
+            })
+        });
+    </script>
+</body>
+
+</html>

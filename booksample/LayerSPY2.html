@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = new ol.Map({
+            target: "map",
+            layer: [],
+            view: new ol.View({
+                center: ol.proj.fromLonLat([-109, 46.5]),
+                zoom: 6
+            })
+        });
+        var key = "AuUKioHoVzV-16Ep0yv6ay21ixWZ5OZ7jDs-k7g03fiUMbN6GSH97IpRcQ_s_s3-";
+        var BingMapRoad = new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: key,
+                imagerySet: 'Road'
+            }),
+            name: 'BingMap的道路图层'
+        });
+        var BingMapAerial = new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key: key,
+                imagerySet: 'Aerial'
+            }),
+            name: 'BingMap的影像图层'
+        });
+        map.addLayer(BingMapAerial);
+        map.addLayer(BingMapRoad);
+        
+        //结合jQuery插件的方法，实现对图层的裁剪
+        var radius = 75; //圆半径
+        //用keydown事件实现在键盘上通过up和down按键改变圆的半径
+        $(document).keydown(function (evt) {
+            if (evt.which === 38) {
+                radius = Math.min(radius + 5, 150); //按up，半径扩大5px
+                map.render(); //渲染地图
+            } else if (evt.which === 40) {
+                radius = Math.max(radius - 5, 25);
+                map.render();
+            }
+        });
+        //在每次鼠标发生移动时获取当前像素的位置
+        var mousePosition = null;
+        //通过on方法为地图视图绑定mousemove与mouseout事件
+        $(map.getViewport()).on('mousemove', function (evt) {
+            //获取当前鼠标位置的像素
+            mousePosition = map.getEventPixel(evt.originalEvent);
+            map.render();
+        }).on('mouseout', function () {
+            mousePosition = null; //置空鼠标位置信息对象
+            map.render();
+        });
+        BingMapRoad.on("precompose",function(event){    //准备渲染，未渲染
+            var ctx=event.context;//影像图层画布
+            var pixelRatio=event.frameState.pixelRatio;//像素比
+            ctx.save();
+            ctx.beginPath();    //开始一条路径，或重置当前的路径
+            if(mousePosition){
+                ctx.arc(mousePosition[0]*pixelRatio,mousePosition[1]*pixelRatio,radius*pixelRatio,0,2*Math.PI);//设置画布区为一个圆
+                ctx.lineWidth=5*pixelRatio;
+                ctx.strokeStyle='rgba(0,0,0,0.5)';
+                ctx.stroke();
+            }
+            ctx.clip();//裁剪画布
+            /*一旦剪切了某个区域，则所有之后的绘图都会被限制在被剪切的区域内（不能访问画布上的其他区域）。您也可以在使用 clip() 方法前通过使用 save() 方法对当前画布区域进行保存，并在以后的任意时间对其进行恢复（通过 restore() 方法）*/
+        });
+        BingMapRoad.on('postcompose',function(event){   //地图渲染中
+            var ctx=event.context;
+            ctx.restore();  //还原画布
+        })
+    </script>
+</body>
+
+</html>

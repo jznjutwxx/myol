@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 绘制线段 -->
+    <canvas id="tutorial" width="300" height="300"></canvas>
+</body>
+<script type="text/javascript">
+    // function draw() {
+    //     var canvas = document.getElementById('tutorial');
+    //     var lineCaps = ["butt", "round", "square"];
+    //     if (canvas.getContext) {
+    //         var ctx = canvas.getContext("2d");           
+
+    //         for (var i = 0; i < 3; i++) {
+    //             ctx.beginPath();
+    //             ctx.moveTo(20 + 30 * i, 30);
+    //             ctx.lineTo(20 + 30 * i, 100);
+    //             ctx.lineWidth = 20;
+    //             ctx.lineCap = lineCaps[i];
+    //             ctx.stroke();
+    //         }
+
+    //         ctx.beginPath();
+    //         ctx.moveTo(0, 30);
+    //         ctx.lineTo(300, 30);
+
+    //         ctx.moveTo(0, 100);
+    //         ctx.lineTo(300, 100)
+
+    //         ctx.strokeStyle = "red";
+    //         ctx.lineWidth = 1;
+    //         ctx.stroke();
+
+    //     } else {
+
+    //     }
+    // }
+    function draw() {
+        var canvas = document.getElementById('tutorial');
+        if (!canvas.getContext) return;
+        var ctx = canvas.getContext("2d");
+
+        ctx.setLineDash([20, 5]); // [实线长度, 间隙长度]
+        ctx.lineDashOffset = -0;
+        ctx.strokeRect(50, 50, 210, 210);
+    }
+    draw();
+</script>
+
+</html>

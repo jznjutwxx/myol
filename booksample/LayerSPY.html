@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>layershot</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var map=new ol.Map({
+            target:"map",
+            layer:[],
+            view:new ol.View({
+                center:ol.proj.fromLonLat([-109,46.5]),
+                zoom:6
+            })
+        });
+        var key= "AuUKioHoVzV-16Ep0yv6ay21ixWZ5OZ7jDs-k7g03fiUMbN6GSH97IpRcQ_s_s3-";
+        var BingMapRoad=new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key:key,
+                imagerySet: 'Road'
+            }),
+            name:'BingMap的道路图层'
+        });
+        var BingMapAerial=new ol.layer.Tile({
+            source: new ol.source.BingMaps({
+                key:key,
+                imagerySet: 'Aerial'
+            }),
+            name:'BingMap的影像图层'
+        });
+        map.addLayer(BingMapAerial);
+        map.addLayer(BingMapRoad);
+        //结合jQuery插件的方法，实现对图层的裁剪
+        var radius=75;//圆半径
+        //用keydown事件实现在键盘上通过up和down按键改变圆的半径
+        $(document).keydown(function(evt){
+            if(evt.which===38){
+                radius=Math.min(radius+5,150);//按up，半径扩大5px
+                map.render();//渲染地图
+            }else if(evt.which===40){
+                radius=Math.max(radius-5,25);
+                map.render();
+            }
+        });
+        var mousePosition=null;
+        $(map.getViewport()).on("mousemove",function(evt){
+            mousePosition=map.getEventPixel(evt.originalEvent);//获得当前鼠标的位置
+            map.render();
+        }).on("mouseout",function(){
+            mousePosition=null;
+            map.render();
+        });
+        BingMapRoad.on("precompose",function(event){
+            var ctx=event.context;//影像图层画布
+            var pixelRatio=event.frameState.pixelRatio;//像素比
+            ctx.save();
+            ctx.beginPath();
+            if(mousePosition){
+                ctx.arc(mousePosition[0]*pixelRatio,mousePosition[1]*pixelRatio,radius*pixelRatio,0,2*Math.PI);//设置画布区为一个圆
+                ctx.lineWidth=5*pixelRatio;
+                ctx.strokeStyle='rgba(0,0,0,0.5)';
+                ctx.stroke();
+            }
+            ctx.clip();//裁剪画布
+        })
+        BingMapRoad.on("postcompose",function(event){
+            console.log(event);
+            var ctx=event.context;
+            ctx.restore();//还原画布
+        })
+    </script>
+</body>
+</html>

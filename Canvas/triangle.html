@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 绘制三角形 -->
+    <canvas id="tutorial" width="300" height="300"></canvas>
+</body>
+<script type="text/javascript">
+    function draw() {
+        var canvas = document.getElementById('tutorial');
+        if (canvas.getContext) {
+            var ctx = canvas.getContext("2d");
+            ctx.beginPath();    //新建一条path
+            ctx.moveTo(50,50);  //将画笔移动到指定的坐标
+            ctx.lineTo(200,50); 
+            ctx.lineTo(200,200); 
+            ctx.closePath();
+            // ctx.stroke();   //绘制路径
+            ctx.fill();
+        } else {
+
+        }
+    }
+    draw();
+</script>
+
+</html>

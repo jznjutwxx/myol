@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>fullScreen</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        let map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                projection: 'EPSG:3857',
+                center: [0, 0],
+                zoom: 0
+            }),
+            controls: ol.control.defaults().extend([
+                new ol.control.FullScreen(),
+                new ol.control.MousePosition(),
+                new ol.control.OverviewMap({
+                    collapsed: false
+                }),
+                new ol.control.ScaleLine()
+            ])
+        });
+
+
+        const layer = new ol.layer.Vector({ //以下为图层的属性选项， 都可设置，所以皆有getter/setter
+            opacity: 2, //透明度 区间范围为(0, 1) 默认为1
+            visible: true, //显示属性 布尔值 默认为true
+            extent: [], //图层渲染的边界范围。该层将不会在此范围之外呈现
+            zIndex: 2, //图层渲染的索引层级。在渲染时，图层将被排序，首先是z-idnex，然后是位置，当为undefined时，对于添加到映射的layers集合中的层，zIndex为0，或者当使用该层的setMap()方法时，zIndex为无穷大
+            minResolution: 3, //该层可见的最小分辨率(包括在内)
+            maxResolution: 6, //该层可见的最大分辨率（包括在内）
+            renderOrder: orderFunc, //渲染顺序。函数用于在呈现前对特性进行排序。默认情况下，特性是按照创建它们的顺序绘制的。使用null来避免排序，但是得到一个未定义的绘制顺序
+            renderBuffer: 100, //默认为100 缓冲区
+            renderMode: 'vector', //默认为'vector' 矢量图层的渲染模式(1.'image' 矢量图层被渲染为图像。性能很好，但是点符号和文本总是随着视图旋转，像素在缩放动画中缩放;2.'vector' 矢量图层被呈现为向量。即使在动画期间也有最准确的渲染，但性能较慢)
+            source: new ol.source.VectorSource(), //图层源
+            map: map, //把图层覆盖在地图上，地图不会在它的图层集合中管理这个图层，这个图层将被呈现在顶部，这对于临时层非常有用
+            declutter: false, //默认为false 整理图片和文字。清理应用于所有图像和文本样式，优先级由样式的z-index定义。z-index指数越低，优先级越高
+            style: new ol.style.Style(), //图层样式
+            updateWhileAnimating: false, //默认为false 
+            updateWhileInteracting: false, //默认为false
+        })
+        map.addLayer(layer);
+        
+    </script>
+</body>
+
+</html>

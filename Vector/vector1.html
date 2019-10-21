@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Panda Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [118.980624870461128, 31.161307640513321],
+                zoom: 8,
+                projection: 'EPSG:4326'
+            }),
+            target: 'map'
+        });
+        var vectorLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                url: '../data/geojson/line.geojson',
+                format: new ol.format.GeoJSON()
+            })
+        });
+        //因为是异步加载，所以要采用事件监听的方式来判定是否加载完成
+        var listenKey = vectorLayer.getSource().on('change', function () {
+            if(vectorLayer.getSource().getState()==='ready'){   //判定是否加载完成
+                alert(vectorLayer.getSource().getFeatures().length);
+                vectorLayer.getSource().unByKey(listenKey); //注销监听器
+            }
+        });
+        map.addLayer(vectorLayer);
+        //如果在此处调用vectorLayer.getSource().getFeatures()是完全有可能获取不到任何Feature的，这是常犯错误
+    </script>
+</body>
+
+</html>

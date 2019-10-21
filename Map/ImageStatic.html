@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Panda Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var center = ol.proj.transform([104.06667, 30.66667], 'EPSG:4326', 'EPSG:3857');
+        //计算熊猫基地地图映射到地图上的范围，图片像素为680*426，保持比例的情况下，把分辨率放大一些
+        /*这个地方我想让图片本身的大小和地理范围产生联系，图片的大小为680*426像素，在此基础上同比放大1000倍，作地理范围。当然也可以不用放大，直接作为地理范围，只是这样需要放大地图到很高的层级才能看到它。有了这样的映射关系后，图片能保持长宽比不变，从而不变形。为什么引入center，除以2相关的计算？这是一个简单计算，目的在于设置图片显示在地图中心。*/
+        var extent = [
+            center[0] - 680 * 1000 / 2,
+            center[1] - 426 * 1000 / 2,
+            center[0] + 680 * 1000 / 2,
+            center[1] + 426 * 1000 / 2
+        ];
+        var map=new ol.Map({
+            target:'map',
+            // layers:[
+            //     new ol.layer.Tile({
+            //         source:new ol.source.OSM()
+            //     })
+            // ],
+            view:new ol.View({
+                center:center,
+                zoom:7
+            })
+        });
+        //加载熊猫基地静态图层
+        map.addLayer(new ol.layer.Image({
+            source:new ol.source.ImageStatic({
+                url:'../images/panda.jpg',
+                imageExtent:extent  //映射到地图的范围
+            })
+        }));
+    </script>
+</body>
+
+</html>

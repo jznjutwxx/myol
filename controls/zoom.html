@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Zoom</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <style>
+        #map .ol-zoom .ol-zoom-out{
+            margin-top: 204px;
+        }
+        #map .ol-zoomslider{
+            background-color: transparent;
+            top:2.3em;
+        }
+        #map .ol-zoom-extent{
+            top:280px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        let map=new ol.Map({
+            target:'map',
+            layers:[
+                new ol.layer.Tile({
+                    source:new ol.source.OSM()
+                })
+            ],
+            view:new ol.View({
+                projection:'EPSG:3857',
+                center:[0,0],
+                zoom:0
+            }),
+            controls:ol.control.defaults().extend([
+                new ol.control.ZoomSlider(),
+                new ol.control.ZoomToExtent({
+                    extent:[
+                        12667718,2562800,
+                        12718359,2597725
+                    ]
+                })
+            ])
+        });
+    </script>
+</body>
+</html>

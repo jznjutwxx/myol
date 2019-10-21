@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        var beijing=ol.proj.fromLonLat([116.28, 39.54]);
+        let map=new ol.Map({
+            target:'map',
+            layers:[
+                new ol.layer.Tile({
+                    source:new ol.source.OSM()
+                })
+            ],
+            view:new ol.View({
+                center:beijing,
+                zoom:4
+            })
+        });
+        //实例化矢量点要素，通过矢量图层添加到地图容器中，这样就实现了预先加载图文标注
+        var iconFeature=new ol.Feature({
+            geometry:new ol.geom.Point(beijing),
+            name:'北京市',  //自定义属性项，可根据需要自行定义，这些属性可通过get方法进行获取，如feature.get('name')
+            population:2115
+        });
+        //设置点要素样式
+        iconFeature.setStyle(createLabelStyle(iconFeature));
+        //矢量标注的数据源
+        var vectorSource=new ol.source.Vector({
+            features:[iconFeature]
+        });
+        //矢量标注图层
+        var vectorLayer=new ol.layer.Vector({
+            source:vectorSource
+        });
+        map.addLayer(vectorLayer);
+
+        //矢量标注样式设置函数
+        function createLabelStyle(feature){
+            return new ol.style.Style({
+                image:new ol.style.Icon({
+                    anchor:[0.5,30],
+                    anchorOrigin:'top-right',
+                    anchorXUnits:'fraction',
+                    anchorYUnits:'pixels',
+                    offsetOrigin:'top-right',
+                    opacity:0.75,
+                    src:'../images/btn_gongchengwg.png'
+                }),
+                text:new ol.style.Text({
+                    textAlign:'center',
+                    textBaseline:'middle',
+                    offsetY:10,
+                    font:'normal 14px 微软雅黑',
+                    text:feature.get('name'),
+                    fill:new ol.style.Fill({
+                        color:'#000'
+                    }),
+                    stroke:new ol.style.Stroke({
+                        color:'#F00',
+                        width:2
+                    })
+                })
+            });
+        }
+
+        map.on('click',function(evt){
+            var coordinate=evt.coordinate;
+            var newFeature=new ol.Feature({
+                geometry:new ol.geom.Point(coordinate),
+                name:'标注点'
+            });
+            newFeature.setStyle(createLabelStyle(newFeature));
+            vectorSource.addFeature(newFeature);
+        });
+
+    </script>
+</body>
+</html>

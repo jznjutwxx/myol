@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>薛海云</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="overLay">
+        <div id="label">
+            <div class="marker"></div>
+            <a class="address" target="_blank" id="address" href="http://www.openlayers.org/">武汉市</a>
+        </div>
+    </div>
+    <script>
+        var wuhan = ol.proj.fromLonLat([114.21, 30.37]);
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: wuhan,
+                zoom: 4
+            })
+        });
+        //实例化overlay标注，添加到地图容器中
+        var overlay = new ol.Overlay({
+            position: wuhan,
+            positioning: 'center-center',
+            element: document.getElementById('label')
+        });
+        overlay.getElement().title = '武汉市';
+        map.addOverlay(overlay);
+
+        map.on('click', function (evt) {
+            var coordinate = evt.coordinate;
+            var elementDiv = document.createElement('div');
+            var markerDiv = document.createElement('div');
+            markerDiv.className = 'marker';
+            elementDiv.appendChild(markerDiv);
+            var addressDiv = document.createElement('a');
+            addressDiv.className = 'address';
+            addressDiv.innerText = '标注点';
+            elementDiv.appendChild(addressDiv);
+            var overLayElement = document.getElementById('overLay');
+            overLayElement.appendChild(elementDiv);
+            var newOverlay = new ol.Overlay({
+                position: coordinate,
+                positioning: 'center-center',
+                element: elementDiv
+            });
+            map.addOverlay(newOverlay);
+        });
+
+    </script>
+</body>
+
+</html>

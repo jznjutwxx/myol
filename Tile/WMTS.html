@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WMTS</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var resolutions = []; //分辨率数组
+        var tileSize = 256; //瓦片大小
+        var extent = [12665080.52765571, 2550703.6338763316, 12725465.780000998, 2601457.820657688]; //深圳地区
+        var projection = new ol.proj.get('EPSG:3857'); //获得对应的投影坐标系
+        var projectionExtent = projection.getExtent(); //投影坐标系的范围
+        //初始化分辨率数组
+        for (var i = 0; i < 19; i++) {
+            resolutions[i] = Math.pow(2, 18 - i);
+        }
+        var tileGrid = new ol.tilegrid.TileGrid({
+            //投影坐标系范围的左上角为瓦片坐标系原点
+            origin: ol.extent.getTopLeft(projectionExtent), //WMTS Origin在左上角，origin位置不能变
+            resolutions: resolutions,
+            // extent:projectionExtent,
+            extent: extent, //只显示深圳片区的瓦片，其余的瓦片不显示
+            tileSize: [256, 256]
+        });
+
+        let map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source:new ol.source.OSM()
+                }),
+                new ol.layer.Tile({
+                    source: new ol.source.TileImage({
+                        projection: projection,
+                        tileGrid: tileGrid,
+                        tileUrlFunction: function (tileCoord, pixelRatio, proj) {
+                            if (!tileCoord) {
+                                return "";
+                            }
+                            var z = tileCoord[0];
+                            var x = tileCoord[1];
+                            var y = -tileCoord[2] - 1; // y轴取反，-1目的是为了从0开始计数；
+
+                            return ''; // 自行设置URL ，请注意 WMTS中用TileRow标识Y，用TileCol表示X；
+                        }
+                    }),
+                })
+            ],
+            view: new ol.View({
+                projection: projection,
+                center: [12697184.079535482, 2563239.3065151004],
+                resolutions: resolutions,
+                zoom: 0
+            })
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Panda Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [118.980624870461128, 31.161307640513321],
+                zoom: 8
+            }),
+            target: 'map'
+        });
+        //加载矢量地图
+        function addGeoJSON(data){
+            var layer=new ol.layer.Vector({
+                source:new ol.source.Vector({
+                    features:(new ol.format.GeoJSON()).readFeatures(data,{
+                        dataProjection:'EPSG:4326',
+                        featureProjection:'EPSG:3857'
+                    })
+                }),
+                style:new ol.style.Style({
+                    stroke:new ol.style.Stroke({
+                        color:'black',
+                        width:1
+                    })
+                })
+            });
+            map.addLayer(layer);
+        }
+        $.ajax({
+            url:'http://localhost:8098/data/geojson/line.geojson',
+            success:function(data,status){
+                console.log(data);
+            }
+        })
+    </script>
+</body>
+
+</html>

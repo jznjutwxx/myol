@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Panda Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 3
+            }),
+            target: 'map'
+        });
+        //点要素
+        var pointFeature = new ol.Feature(
+            new ol.geom.Point([0, 0])
+        );
+        //线要素
+        var lineFeature = new ol.Feature(
+            new ol.geom.LineString([
+                [-1e7, 1e6],
+                [-1e6, 3e6]
+            ])
+        );
+        //多边形要素
+        var polygonFeature = new ol.Feature(
+            new ol.geom.Polygon([
+                [
+                    [-3e6, -1e6],
+                    [-3e6, 1e6],
+                    [-1e6, 1e6],
+                    [-1e6, -1e6],
+                    [-3e6, -1e6]
+                ]
+            ])
+        );
+        //实例化一个矢量图层Vector作为绘制图层
+        var source = new ol.source.Vector({
+            features: [
+                pointFeature,
+                lineFeature,
+                polygonFeature
+            ]
+        });
+        var vectorLayer = new ol.layer.Vector({
+            source: source,
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255,255,255,0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffcc33',
+                    width: 2
+                }),
+                image: new ol.style.Circle({
+                    radius: 7,
+                    fill: new ol.style.Fill({
+                        color: '#ffcc33'
+                    })
+                })
+            })
+        });
+        map.addLayer(vectorLayer);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>地图动态交换</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map1" style="width: 60%"></div>
+    <p>---------------------------</p>
+    <div id="map2" style="width: 60%"></div>
+    <input type="button" onClick="swapMap();" value="调换地图" />
+    <script>
+        var map1 = new ol.Map({
+            target: 'map1',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 2
+            })
+        });
+        var map2 = new ol.Map({
+            target: 'map2',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 2
+            })
+        });
+        function swapMap(){
+            map1.setTarget('map2');
+            map2.setTarget('map1');
+        }
+    </script>
+</body>
+
+</html>

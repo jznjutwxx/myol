@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 绘制圆弧 -->
+    <canvas id="tutorial" width="300" height="300"></canvas>
+</body>
+<script type="text/javascript">
+    //圆弧1
+    // function draw() {
+    //     var canvas = document.getElementById('tutorial');
+    //     if (canvas.getContext) {
+    //         var ctx = canvas.getContext("2d");
+    //         ctx.beginPath();
+    //         ctx.arc(50,50,40,0,Math.PI/2,false);//arc(x, y, r, startAngle, endAngle, anticlockwise):以(x, y)为圆心，以r为半径，从 startAngle弧度开始到endAngle弧度结束。anticlosewise是布尔值，true表示逆时针，false表示顺时针。(默认是顺时针)
+    //         ctx.stroke();
+    //     } else {
+
+    //     }
+    // }
+
+    //圆弧2
+    // function draw() {
+    //     var canvas = document.getElementById('tutorial');
+    //     if (!canvas.getContext) return;
+    //     var ctx = canvas.getContext("2d");
+    //     ctx.beginPath();
+    //     ctx.arc(50, 50, 40, 0, Math.PI / 2, false);
+    //     ctx.stroke();
+
+    //     ctx.beginPath();
+    //     ctx.arc(150, 50, 40, 0, -Math.PI / 2, true);
+    //     ctx.closePath();
+    //     ctx.stroke();
+
+    //     ctx.beginPath();
+    //     ctx.arc(50, 150, 40, -Math.PI / 2, Math.PI / 2, false);
+    //     ctx.fill();
+
+    //     ctx.beginPath();
+    //     ctx.arc(150, 150, 40, 0, Math.PI, false);
+    //     ctx.fill();
+
+    // }
+
+    //圆弧3
+    function draw() {
+        var canvas = document.getElementById('tutorial');
+        if (!canvas.getContext) return;
+        var ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.moveTo(50, 50);
+        //参数1、2：控制点1坐标   参数3、4：控制点2坐标  参数4：圆弧半径
+        ctx.arcTo(200, 50, 200, 200, 100);
+        ctx.lineTo(200, 200)
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.rect(50, 50, 10, 10);
+        ctx.rect(200, 50, 10, 10)
+        ctx.rect(200, 200, 10, 10)
+        ctx.fill()
+    }
+
+    draw();
+</script>
+
+</html>

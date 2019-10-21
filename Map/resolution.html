@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Map</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width:100%"></div>
+    <div><span>当前层级：</span><span id="zoom"></span><span>分辨率：</span><span id="resolution"></span></div>
+    <script>
+        let map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: ol.proj.transform([104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+        map.getView().on('change:resolution', function () {
+            document.getElementById('zoom').innerHTML = this.getZoom() + '，';
+            document.getElementById('resolution').innerHTML = this.getResolution();
+        });
+        document.getElementById('zoom').innerHTML = map.getView().getZoom() + '，';
+        document.getElementById('resolution').innerHTML = map.getView().getResolution();
+    </script>
+</body>
+
+</html>
