@@ -1,0 +1,62 @@
+<!-- 此处的大量图标方案，不涉及服务器端，如果图标不进行交互，可以把图标渲染到底图上。 此处只介绍说明在前端可交互的大量图标方案，在图标数量不大的情况，无论使用什么方式加载，都不会有性能问题，当图标多了之后，就会出现卡顿，内存占用增大等问题。 -->
+
+<!-- 一、复用样式减少内存占用
+
+在应用大量图标的时候，其实图标样式差异化并不大，比如快餐店，公共厕所，公交站点等等有很多，但都是用同样的图标在地图上标准，在不注意的时候，我们是采用下面的方式来添加图标的： -->
+
+<!-- for (var index = 0; index < 10000; index++) {
+    var feature = new ol.Feature({
+        geometry: new ol.geom.Point([latlon[index].lon, latlon[index].lat])
+    });
+    feature.setStyle(new ol.style.Style({
+        image: new ol.style.Icon({
+            src: '../img/marker.png'
+        })
+    }));
+} -->
+
+<!-- 注意上面代码，对每个feature设置style的时候，都是直接new的，这样势必会创建很多对象，占用很多内存。 那么复用必然减少很多内存，重构上面的代码为： -->
+<!-- var style = new ol.style.Style({
+    image: new ol.style.Icon({
+        src: '../img/marker.png'
+    })
+});
+for (var index = 0; index < 10000; index++) {
+    var feature = new ol.Feature({
+        geometry: new ol.geom.Point([latlon[index].lon, latlon[index].lat])
+    });
+    feature.setStyle(style);
+} -->
+
+<!-- 这样，我们就只创建了一个style对象，那么势必减少内存占用。 如果有多类图标，可以用数组缓存下来： -->
+<!-- var styles = [
+    new ol.style.Style({
+        image: new ol.style.Icon({
+            src: '../img/marker1.png'
+        })
+    }),
+    new ol.style.Style({
+        image: new ol.style.Icon({
+            src: '../img/marker2.png'
+        })
+    }),
+    new ol.style.Style({
+        image: new ol.style.Icon({
+            src: '../img/marker3.png'
+        })
+    })
+];
+
+
+for (var index = 0; index < 10000; index++) {
+    var feature = new ol.Feature({
+        geometry: new ol.geom.Point([latlon[index].lon, latlon[index].lat])
+    });
+    feature.setStyle(styles[index % styles.length]);
+} -->
+
+
+<!-- 二、复用Canvas提高效率 -->
+<!-- 采用上一种方式基本能解决掉绝大部分的问题，但是OpenLayers 3还提供了一种复用图标渲染使用的Canvas的方式，对应的类是ol.style.AtlasManager。 在了解其作用之前，需要先了解一点图标的渲染机制，比如ol.style.Circle和ol.style.RegularShape这样的图标，在内部渲染时，都会创建一个HTML的canvas，然后在这个画布上绘制图像，然后再把图像复制到地图上。 这样创建一个图标，就会在内部创建一个canvas。 ol.style.AtlasManager解决的问题就是，用一个大的canvas来绘制多个图标，这样就能减少canvas的数量，从而提高效率。
+
+官网有一个具体的例子来说明这种方法的使用，参见Symbols with WebGL。 其中，关键的代码在： -->

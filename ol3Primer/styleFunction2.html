@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>根据层级放大缩小图标</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        //创建layer使用的style function，根据feature的自定义type，返回不同的样式
+        var layerStyleFunction = function (feature, resolution) {
+            var type = feature.get('type');
+            var style = null;
+            //点
+            if (type === 'point') {
+                style = new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 1,
+                        fill: new ol.style.Fill({
+                            color: 'red'
+                        })
+                    })
+                });
+            } else if (type === 'circle') {
+                style = new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 10,
+                        stroke: new ol.style.Stroke({
+                            color: 'red',
+                            width: 1
+                        })
+                    })
+                });
+            } else {
+                style = new ol.style.Style({
+                    image: new ol.style.RegularShape({
+                        points: 5,
+                        radius: 10,
+                        fill: new ol.style.Fill({
+                            color: 'blue'
+                        })
+                    })
+                });
+            }
+            return [style];
+        };
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: layerStyleFunction
+        });
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                layer
+            ],
+            view: new ol.View({
+                center: [104.06, 30.67],
+                projection: 'EPSG:4326',
+                zoom: 10
+            })
+        });
+        var rect = new ol.Feature({
+            geometry: new ol.geom.Point([104.06, 30.67])
+        });
+        layer.getSource().addFeature(rect);
+        var circle = new ol.Feature({
+            geometry: new ol.geom.Point([104.06, 30.67])
+        });
+        circle.set('type', 'circle');
+        layer.getSource().addFeature(circle);
+        var point = new ol.Feature({
+            geometry: new ol.geom.Point([104.06, 30.67])
+        });
+        point.set('type', 'point');
+        layer.getSource().addFeature(point);
+    </script>
+</body>
+
+</html>

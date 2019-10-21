@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>自定义事件</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <style type="text/css">
+        #anchor {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        new ol.Map({
+            // 让所有的zoom开关都设置为false
+            interactions: ol.interaction.defaults({
+                doubleClickZoom: false,
+                mouseWheelZoom: false,
+                shiftDragZoom: false,
+                pinchZoom: false
+            }),
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.transform(
+                    [104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+    </script>
+</body>
+
+</html>

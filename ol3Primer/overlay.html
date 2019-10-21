@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>应用overlay</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <style type="text/css">
+        #anchor{
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+        <div id="map" style="width: 100%"></div>
+        <div id="anchor"><img src="../images/ico_yongsxl.png" /></div>
+    <script>
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            view: new ol.View({
+                center: [104.06, 30.67],
+                projection:'EPSG:4326',
+                zoom: 10
+            })
+        });
+
+        var anchor=new ol.Overlay({
+            element:document.getElementById('anchor')
+        });
+        //设置图标附加到地图上的位置
+        anchor.setPosition([104.06, 30.67]);
+        map.addOverlay(anchor);
+
+    </script>
+</body>
+
+</html>

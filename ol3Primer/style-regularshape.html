@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>规则几何体图标</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        //设置一个vector的layer来放置图标
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector()
+        });
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                layer
+            ],
+            view: new ol.View({
+                center: [104.06, 30.67],
+                projection: 'EPSG:4326',
+                zoom: 10
+            })
+        });
+
+        //添加一个三角形
+        var shape = new ol.Feature({
+            geometry: new ol.geom.Point([104.06, 30.67])
+        });
+        shape.setStyle(new ol.style.Style({
+            image: new ol.style.RegularShape({
+                points: 3, //顶点数
+                radius: 20, //图形大小
+                // rotation:10,    //旋转
+                stroke: new ol.style.Stroke({ //设置边的样式
+                    color: 'red',
+                    width: 2
+                })
+            })
+        }));
+        layer.getSource().addFeature(shape);
+        //添加一个五星
+        var star = new ol.Feature({
+            geometry: new ol.geom.Point([104.16, 30.67])
+        });
+        star.setStyle(new ol.style.Style({
+            image: new ol.style.RegularShape({
+                points: 5, //顶点个数
+                radius1: 20, //外圈大小
+                radius2: 10, //内圈大小                
+                stroke: new ol.style.Stroke({ //设置边的样式
+                    color: 'red',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({ //设置五星填充样式
+                    color: 'blue'
+                })
+            })
+        }));
+        layer.getSource().addFeature(star);
+    </script>
+</body>
+
+</html>

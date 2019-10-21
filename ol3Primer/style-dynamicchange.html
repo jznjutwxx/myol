@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>动态改变图标</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        //设置一个vector的layer来放置图标
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector()
+        });
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                layer
+            ],
+            view: new ol.View({
+                center: [104.06, 30.67],
+                projection: 'EPSG:4326',
+                zoom: 10
+            })
+        });
+
+        // 添加一个空心的五星
+        var star = new ol.Feature({
+            geometry: new ol.geom.Point([104.06, 30.67])
+        });
+        star.setStyle(new ol.style.Style({
+            image: new ol.style.RegularShape({
+                points: 5,
+                radius1: 20,
+                radius2: 10,
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    size: 2
+                })
+            })
+        }));
+
+        layer.getSource().addFeature(star);
+
+        //监听地图点击事件
+        map.on('click', function (event) {
+            var feature = map.forEachFeatureAtPixel(event.pixel, function (feature) {
+                return feature;
+            });
+            if (feature) {
+                //将空心五角星变为红色实心五角星
+                var style = feature.getStyle().getImage();
+                feature.setStyle(new ol.style.Style({
+                    image: new ol.style.RegularShape({
+                        points: 5,
+                        radius1: 20,
+                        radius2: 10,
+                        stroke: style.getStroke(),
+                        fill: new ol.style.Fill({
+                            color: 'red'
+                        })
+                    })
+                }));
+            }
+
+        });
+    </script>
+</body>
+
+</html>

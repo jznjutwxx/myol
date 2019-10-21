@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>自定义事件</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+    <style type="text/css">
+        #anchor{
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+        <div id="map" style="width: 100%"></div>
+    <script>
+        var feature1=new ol.Feature({
+            geometry:new ol.geom.Point([0,0])
+        });
+        feature1.setStyle(new ol.style.Style({
+            image:new ol.style.Circle({
+                radius:100,
+                fill:new ol.style.Fill({
+                    color:'red'
+                })
+            })
+        }));
+        // 在坐标[5000000, 5000000]处创建另一个feature
+        var feature2 = new ol.Feature({
+            geometry: new ol.geom.Point([5000000, 5000000])
+        });
+
+        // 并设置为半径为100像素的圆，用黄色填充
+        feature2.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 100,
+                fill: new ol.style.Fill({
+                    color: 'yellow'
+                })
+            })
+        }));
+
+        var map = new ol.Map({
+            target: 'map',
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                new ol.layer.Vector({
+                    source:new ol.source.Vector({
+                        features:[feature1,feature2]
+                    })
+                })
+            ],
+            view: new ol.View({
+                center: [0,0],
+                zoom: 2
+            })
+        });
+        //为地图注册鼠标移动事件的监听
+        map.on('pointermove',function(event){
+            map.forEachFeatureAtPixel(event.pixel,function(feature){
+                //为移动到的feature发送自定义的mousemove消息
+                feature.dispatchEvent({type:'mousemove',event:event});
+            })
+        });
+        //为feature1注册自定义事件mousemove的监听
+        feature1.on('mousemove',function(event){
+            this.setStyle(new ol.style.Style({
+                image:new ol.style.Circle({
+                    radius:100,
+                    fill:new ol.style.Fill({
+                        color:'blue'
+                    })
+                })
+            }))
+        });
+
+        //为feature2注册自定义事件mousemove的监听
+        feature2.on('mousemove',function(event){
+            this.setStyle(new ol.style.Style({
+                image:new ol.style.Circle({
+                    radius:100,
+                    fill:new ol.style.Fill({
+                        color:'gray'
+                    })
+                })
+            }))
+        });
+        
+
+    </script>
+</body>
+
+</html>
