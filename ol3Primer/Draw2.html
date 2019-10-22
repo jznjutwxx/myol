@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>限制绘制点个数并显示坐标</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div style="background-color: #999;"><span>当前绘制线的坐标：</span><span id='points'></span></div>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                })
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.transform(
+                    [104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+
+        //添加一个绘制线使用的layer
+        var lineLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    size: 1
+                })
+            })
+        })
+        map.addLayer(lineLayer);
+        var lineDraw = new ol.interaction.Draw({
+            type: 'LineString',
+            source: lineLayer.getSource(),
+            stroke: new ol.style.Stroke({
+                color: '#009933',
+                width: 1
+            }),
+            maxPoints: 4
+        });
+        //监听绘制结束事件，获取坐标
+        lineDraw.on('drawend', function (event) {
+            document.getElementById('points').innerHTML = JSON.stringify(event.feature.getGeometry()
+                .getCoordinates());
+        });
+
+        map.addInteraction(lineDraw);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>直接对Feature过滤</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        //只希望用户能选取圆形，而不能选取五星，选取方式为默认的单击
+
+        //创建一个用于存放circle的layer
+        var circleLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'red'
+                    })
+                })
+            })
+        });
+        //创建一个用于存放star的layer
+        var starLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                image: new ol.style.RegularShape({
+                    points: 5,
+                    radius1: 20,
+                    radius2: 10,
+                    fill: new ol.style.Fill({
+                        color: 'red'
+                    })
+                })
+            })
+        });
+
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                circleLayer,
+                starLayer
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.transform(
+                    [104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+
+        // 在地图上添加一个圆
+        var circle = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(
+                [104, 30], 'EPSG:4326', 'EPSG:3857'))
+        });
+        circleLayer.getSource().addFeature(circle);
+        // 在地图上添加一个五星
+        var star = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(
+                [104.06, 30.05], 'EPSG:4326', 'EPSG:3857'))
+        })
+        starLayer.getSource().addFeature(star);
+
+        //添加一个用于选择Feature的交互方式
+        map.addInteraction(new ol.interaction.Select({
+            // multi:true,
+            //设置选中后的样式
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'blue'
+                    })
+                })
+            }),
+            //设置过滤条件
+            filter: function (feature, layer) {
+                return layer === circleLayer
+            }
+        }));
+    </script>
+</body>
+
+</html>

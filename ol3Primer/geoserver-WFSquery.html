@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>通过WFS查询要素</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        var vector = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                format: new ol.format.GeoJSON(),
+                // 需配置Geoserver跨域
+                url: 'http://localhost:8088/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=nyc:nyc_roads&outputFormat=application/json&srsname=EPSG:4326',
+
+                //也支持filter过滤查询
+                // url:'http://localhost:8088/geoserver/wfs?service=wfs&version=1.1.0&request=GetFeature&typeNames=nyc:nyc_roads&outputFormat=application/json&srsname=EPSG:4326&cql_filter=in%20(%27nyc_roads.1162%27)'
+            }),
+            style: function (feature, resolution) {
+                return new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'blue',
+                        width: 1
+                    })
+                })
+            }
+        });
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                vector
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: [-73.99710639567148, 40.742270050255556],
+                maxZoom: 19,
+                zoom: 14,
+                projection: 'EPSG:4326'
+            })
+        });
+    </script>
+</body>
+
+</html>

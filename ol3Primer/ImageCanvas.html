@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加一个Canvas图层</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" class="map"></div>
+    <script>
+        var isFirst = true; //是否第一次加载该canvas图层
+
+        //为ImageCanvasLayer创建数据源
+        //ImageCanvas有一个canvasFunction属性,其值是一个回调函数
+        var imageCanvas = new ol.source.ImageCanvas({
+            //创建回调函数如下
+            canvasFunction: render({
+                log: 10,
+                lat: 20
+            })
+        });
+
+        function render(data) {
+            //参数1:extent array 左下角投影坐标与右上角投影坐标
+            //参数2:resolution 要生产图像的分辨率
+            //参数3:设备像素比
+            //参数4:图像实际大小
+            //参数5:投影
+            return function (extent, resolution, pixelRatio, size, projection) {
+                //每次的范围变动都会引起重绘，从而触发该回调函数，
+                var [width, height] = size; //画布尺寸
+                var [left, bottom, right, top] = extent; //坐标投影
+                var xScale = width / (right - left); //画布尺寸与坐标投影比
+                var yScale = height / (top - bottom);
+
+                var transform = ol.proj.getTransform('EPSG:4326', 'EPSG:3857');;
+
+
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                var ctx = canvas.getContext('2d');
+                var [lon, lat] = transform([data.lon, data.lat]);
+                //传进来的坐标转为canvas上的点(x,y)
+                var x = (lon - left) * xScale; //转换成手机次尺寸的xy
+                var y = (top - lat) * yScale
+                ctx.beginPath();
+                ctx.arc(x, y, 150 * pixelRatio, 0, 2 * Math.PI);
+                ctx.fillStyle = "blue";
+                ctx.fill(); //画原圆点
+                return canvas;
+            }
+        };
+
+        //创建一个ImageCanvasLayer图层
+        var imageLayer = new ol.layer.Image({
+            source: imageCanvas
+        });
+
+        var layers = [
+            new ol.layer.Tile({
+                source: new ol.source.OSM() //这里使用ol自带的一个地图图层作为底图
+            }),
+            imageLayer
+        ];
+
+        var map = new ol.Map({
+            layers: layers,
+            target: 'map',
+            view: new ol.View({
+                center: [-10997148, 4569099],
+                zoom: 4
+            })
+        });
+    </script>
+</body>
+
+</html>

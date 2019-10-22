@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>动画</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector()
+        });
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                layer
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.transform(
+                    [104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+        var circle = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(
+                [104, 30], 'EPSG:4326', 'EPSG:3857'))
+        });
+        circle.setStyle(new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 0,
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    size: 1
+                })
+            })
+        }));
+        layer.getSource().addFeature(circle);
+
+        //重要实现代码
+        var radius = 0;
+        map.on('postcompose', function () {
+            // 增大半径，最大20
+            radius++;
+            radius = radius % 20;
+            // 设置样式
+            circle.setStyle(new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: radius,
+                    stroke: new ol.style.Stroke({
+                        color: 'red',
+                        size: 1
+                    })
+                })
+            }));
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Feature选取之选中样式2</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <script src="../lib/ol.js"></script>
+</head>
+
+<body>
+    <div id="map" style="width: 100%"></div>
+    <script>
+        var layer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            //把feature上的style移到layer上，避免直接在feature上设置style
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'red'
+                    })
+                })
+            })
+        });
+        var map = new ol.Map({
+            layers: [
+                new ol.layer.Tile({
+                    source: new ol.source.OSM()
+                }),
+                layer
+            ],
+            target: 'map',
+            view: new ol.View({
+                center: ol.proj.transform(
+                    [104, 30], 'EPSG:4326', 'EPSG:3857'),
+                zoom: 10
+            })
+        });
+
+        // 在地图上添加一个圆
+        var circle = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(
+                [104, 30], 'EPSG:4326', 'EPSG:3857'))
+        })
+        //此处不再为feature设置style
+        layer.getSource().addFeature(circle);
+        //添加一个用于选择Feature的交互方式
+        map.addInteraction(new ol.interaction.Select({
+            //设置选中后的样式
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'blue'
+                    })
+                })
+            })
+        }));
+    </script>
+</body>
+
+</html>

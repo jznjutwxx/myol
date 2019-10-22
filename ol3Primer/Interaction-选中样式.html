@@ -46,10 +46,32 @@
         }));
         layer.getSource().addFeature(circle);
         //添加一个用于选择Feature的交互方式
-        var selectSingleClick=new ol.interaction.Select();
-
-
-
+        var selectSingleClick = new ol.interaction.Select({
+            // API文档里面有说明，可以设置style参数，用来设置选中后的样式，但是这个地方我们注释掉不用，因为就算不注释，也没作用，为什么？
+            /**
+            因为我们的circle本身就设置了样式，而style参数设置的样式，其实是设置在内部新建的一个layer上的，而OpenLayers 3中，feature的样式优先级是大于layer的样式的优先级的。所以没生效，如果换成Interaction-选中样式2中的方式，就可以了
+            **/
+            // style: new ol.style.Style({
+            //     image: new ol.style.Circle({
+            //         radius: 10,
+            //         fill: new ol.style.Fill({
+            //             color: 'blue'
+            //         })
+            //     })
+            // })
+        });
+        map.addInteraction(selectSingleClick);
+        //监听选中事件，然后在事件处理函数中改变被选中的feature样式
+        selectSingleClick.on('select',function(event){
+            event.selected[0].setStyle(new ol.style.Style({
+                image:new ol.style.Circle({
+                    radius:10,
+                    fill:new ol.style.Fill({
+                        color:'blue'
+                    })
+                })
+            }));
+        });
     </script>
 </body>
 
