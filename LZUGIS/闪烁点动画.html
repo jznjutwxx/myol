@@ -1,0 +1,120 @@
+<!-- 两种思路：
+https://blog.csdn.net/GISShiXiSheng/article/details/100045151
+1.overlay+css3动画实现；
+2.canvas动画实现。 -->
+
+<!-- 1.overlay+css3实现 -->
+<style>
+    @keyframes animate {
+        0% {
+            transform: scale(0.3);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .animate-overlay {
+        width: 30px;
+        height: 30px;
+        background: radial-gradient(circle, red, rgba(255, 0, 0, 0));
+        border: 1px solid red;
+        border-radius: 50%;
+        animation: 1s animate infinite;
+    }
+</style>
+<script>
+    for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        var coord = ol.proj.fromLonLat([d.lon, d.lat]);
+        var element = document.createElement('div');
+        element.classList.add('animate-overlay');
+        var overlay = new ol.Overlay({
+            element: element,
+        })
+        map.addOverlay(overlay);
+        overlay.setPosition(coord);
+    }
+</script>
+
+<!-- canvas动画实现 -->
+<script>
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+    var gradCircle = new GradCircle(ctx);
+    var radius = 15,
+        changeRadius = 0.5;
+
+    var imageLayer = new ol.layer.Image({
+        source: null,
+        zIndex: 2
+    });
+    map.addLayer(imageLayer);
+    var source = new ol.source.ImageCanvas({
+        canvasFunction: canvasFunction
+    });
+    imageLayer.setSource(source);
+    var playFlag = null;
+
+
+    window.requestAnimationFrame = (
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (callback) {
+            return window.setTimeout(callback, 1000 / 60);
+        }
+    );
+
+    function refresh() {
+        playFlag = window.requestAnimationFrame(refresh);
+        source.refresh();
+    }
+
+    map.on('movestart', function () {
+        window.cancelAnimationFrame(playFlag);
+    });
+    map.on('moveend', function () {
+        resetState();
+    });
+
+    function canvasFunction(extent, res, pixelRatio, size) {
+        canvas.setAttribute('width', size[0]);
+        canvas.setAttribute('height', size[1]);
+        ctx.clearRect(0, 0, size[0], size[1]);
+        var mapExtent = map.getView().calculateExtent();
+        var mapTopLeft = [mapExtent[0], mapExtent[3]];
+        var topLeft = [extent[0], extent[3]];
+        var tlSrc = map.getPixelFromCoordinate(topLeft);
+        var tlMapSrc = map.getPixelFromCoordinate(mapTopLeft);
+        var xOff = tlMapSrc[0] - tlSrc[0],
+            yOff = tlMapSrc[1] - tlSrc[1];
+        //浏览器存在多方的状态下
+        ctx.scale(pixelRatio, pixelRatio);
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            var lonlat = [d.lon, d.lat];
+            var coord = ol.proj.fromLonLat(lonlat);
+            if (ol.extent.containsCoordinate(mapExtent, coord)) {
+                var pixel = map.getPixelFromCoordinate(coord);
+                var x = pixel[0] + xOff,
+                    y = pixel[1] + yOff;
+                d.radius = d.radius + changeRadius;
+                if (d.radius > radius * 2) d.radius = radius;
+                gradCircle.drawGradCircle(x, y, d.radius);
+            }
+        }
+        return canvas;
+    }
+    resetState();
+
+    function resetState() {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            d.radius = radius;
+        }
+        refresh();
+    }
+</script>

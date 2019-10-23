@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>map</title>
+    <style>
+        html,
+        body,
+        #map {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+
+        .zone-nav {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            z-index: 99;
+            background: #fff;
+            box-shadow: 1px 1px 2px #ccc;
+            border-radius: 4px;
+        }
+
+        .zone-nav a {
+            font-size: 13px;
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="zone-nav" id="nav">
+        <a href="#" id="boundry" title="全国" index="0">全国</a>
+        <a href="#" id="province" index="1"></a>
+        <a href="#" id="city" index="2"></a>
+    </div>
+    <div id="map"></div>
+    <script src="../../plugin/jquery/jquery-3.1.1.min.js"></script>
+    <script src="../../plugin/echart3/echarts-all-3.js"></script>
+    <script>
+        var mapDatas = {
+            "全国": "china.json",
+        };
+        var index = 0,
+            chart = null;
+
+        addMap("全国");
+
+        $("#boundry, #province, #city").on("click", function () {
+            index = parseInt($(this).attr("index"));
+            addMap($(this).attr("title"));
+        });
+
+
+        function addMap(zone) {
+            switch (index) {
+                case 1: {
+                    $("#province").html(">>" + zone).attr("title", zone);
+                    $("#city").html("");
+                    break;
+                }
+                case 2: {
+                    $("#city").html(">>" + zone).attr("title", zone);
+                    break;
+                }
+                default: {
+                    $("#province").html("");
+                    $("#city").html("");
+                    break;
+                }
+            }
+
+            if (chart) chart.dispose();
+            chart = echarts.init(document.getElementById('map'));
+            chart.on('click', function (result) {
+                index++;
+                if (index < 3) {
+                    addMap(result.name);
+                }
+            });
+
+            var url = "./mapdata/";
+            if (index === 1) { //省级
+                url += "geometryProvince/";
+            } else if (index === 2) {
+                url += "geometryCouties/";
+            }
+            url += mapDatas[zone];
+
+            $.get(url, function (mapdata) {
+                var features = mapdata.features;
+                for (var i = 0; i < features.length; i++) {
+                    var feature = features[i];
+                    if (!mapDatas[feature.properties.name]) {
+                        var jsonfile = feature.properties.id;
+                        if (index === 1) jsonfile += "00";
+                        mapDatas[feature.properties.name] = jsonfile + ".json";
+                    }
+                }
+
+                echarts.registerMap(zone, mapdata);
+
+                chart.setOption({
+                    roam: true,
+                    series: [{
+                        type: 'map',
+                        map: zone,
+                        scaleLimit: {
+                            min: 0.8,
+                            max: 1.9
+                        }, //缩放
+                        mapLocation: {
+                            y: 60
+                        },
+                        itemSytle: {
+                            emphasis: {
+                                label: {
+                                    show: false
+                                }
+                            }
+                        },
+                        label: {
+                            normal: {
+                                show: true
+                            },
+                            emphasis: {
+                                show: true
+                            }
+                        },
+                        data: []
+                    }]
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

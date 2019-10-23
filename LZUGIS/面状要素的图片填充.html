@@ -1,0 +1,47 @@
+<script>
+    var bounds = [73.4510046356223, 18.1632471876417,
+        134.976797646506, 53.5319431522236
+    ];
+    var projection = new ol.proj.Projection({
+        code: 'EPSG:4326',
+        units: 'degrees'
+    });
+    $.get("data/province.geojson", null, function (result) {
+        var features = (new ol.format.GeoJSON()).readFeatures(result);
+        var vectorSource = new ol.source.Vector();
+        vectorSource.addFeatures(features);
+        var vector = new ol.layer.Vector({
+            renderMode: "image", //image, vector
+            source: vectorSource
+        });
+        var map = new ol.Map({
+            controls: ol.control.defaults({
+                attribution: false
+            }),
+            target: 'map',
+            layers: [vector],
+            view: new ol.View({
+                projection: projection
+            })
+        });
+        map.getView().fit(bounds, map.getSize());
+
+        var cnv = document.createElement('canvas');
+        var ctx = cnv.getContext('2d');
+        var img = new Image();
+        img.src = './css/fill.png';
+        img.onload = function () {
+            var pattern = ctx.createPattern(img, 'repeat');
+            vector.setStyle(new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    lineDash: [5],
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: pattern
+                })
+            }));
+        };
+    });
+</script>

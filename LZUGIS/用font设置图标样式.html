@@ -1,0 +1,34 @@
+<!-- 1、样式引入 -->
+<link rel="stylesheet" type="text/css" href="css/iconfont.css" />
+
+<!-- 2、iconfont.css -->
+<style>
+    @charset "utf-8";
+
+    @font-face {
+        font-family: "iconfont";
+        src: url('./iconfont.woff?t=1502264184772') format('woff');
+    }
+</style>
+
+<!-- 3、样式设置 -->
+<script>
+    function styleFunc(feature, resolution) {
+        var iconFont = 'iconfont';
+        var iconFontText = "\S"; // equates to fa-trash icon
+        var iconSize = 6 * map.getView().getZoom();
+        var col = '#00f';
+
+        var styleIcon = new ol.style.Style({
+            text: new ol.style.Text({
+                font: 'Normal ' + iconSize + 'px ' + iconFont,
+                text: iconFontText,
+                fill: new ol.style.Fill({
+                    color: col
+                }),
+                textBaseline: 'bottom'
+            })
+        });
+        return styleIcon;
+    }
+</script>
