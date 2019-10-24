@@ -1,0 +1,25 @@
+<script>
+    function addSvgLayer() {
+        var _min = [12836027.844390793, 4745190.4650304755],
+            _max = [13098185.245208949, 5069741.1276835548];
+        var _resMin = map.getPixelFromCoordinate(_min),
+            _resMax = map.getPixelFromCoordinate(_max);
+        var _resLeftTop = map.getPixelFromCoordinate([_min[0], _max[1]]);
+        var _w = Math.round(_resMax[0] - _resMin[0]),
+            _h = Math.round(_resMin[1] - _resMax[1]);
+        var _x = _resLeftTop[0],
+            _y = _resLeftTop[1];
+        //<img src="data/wind.svg" style="opacity: 0.6; transform: translate3d(264px, 277px, 0px);width: 567px; height: 627px;">
+        var svg = $("<img/>").addClass("svg-layer").attr("src", "img/wind.svg")
+            .css({
+                "opacity": "0.6",
+                "width": _w + "px",
+                "height": _h + "px",
+                "top": _y + "px",
+                "left": _x + "px"
+            });
+
+        var mapDiv = $("#map").children()[0];
+        $(mapDiv).append(svg);
+    }
+</script>

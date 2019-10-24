@@ -1,0 +1,187 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Ol3 wms</title>
+    <link rel="stylesheet" type="text/css" href="../../../plugin/ol3/css/ol.css" />
+    <style type="text/css">
+        body,
+        #map {
+            border: 0px;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 13px;
+        }
+
+        .style-box {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 999;
+            background: #ffffff;
+            border: 1px solid #cccccc;
+            box-shadow: 2px 2px 3px #C0C0C0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .style-box ul {
+            margin: 0px;
+        }
+
+        .style-box ul li {
+            list-style: none;
+            margin: 0px;
+            margin-left: -40px;
+        }
+
+        .style-box ul li h5 {
+            margin: 6px 0px;
+        }
+    </style>
+    <script type="text/javascript" src="../../../plugin/ol3/build/ol-debug.js"></script>
+    <script type="text/javascript" src="../../../plugin/jquery/jquery-1.8.3.js"></script>
+    <script type="text/javascript" src="extends/color_exchange.js"></script>
+    <script type="text/javascript">
+        function init() {
+            var bounds = [73.4510046356223, 18.1632471876417,
+                134.976797646506, 53.5319431522236
+            ];
+            var projection = new ol.proj.Projection({
+                code: 'EPSG:4326',
+                units: 'degrees'
+            });
+            $.get("data/province.geojson", null, function (result) {
+                var features = (new ol.format.GeoJSON()).readFeatures(result);
+                var vectorSource = new ol.source.Vector();
+                vectorSource.addFeatures(features);
+                var vector = new ol.layer.Vector({
+                    source: vectorSource,
+                    style: getStyle("blue", "true", 2)
+                });
+                var map = new ol.Map({
+                    controls: ol.control.defaults({
+                        attribution: false
+                    }),
+                    target: 'map',
+                    layers: [vector],
+                    view: new ol.View({
+                        projection: projection
+                    })
+                });
+                map.getView().fit(bounds, map.getSize());
+                //线的颜色
+                $("input[name='linecolor']").on("change", function () {
+                    var _color = $(this).val();
+                    if (_color === "") {
+                        $("#linecolor").show();
+                    } else {
+                        $("#linecolor").attr("value", _color).hide();
+                    }
+                    vector.setStyle(getStyle());
+                });
+                //填充颜色
+                $("input[name='fillcolor']").on("change", function () {
+                    var _color = $(this).val();
+                    if (_color === "") {
+                        $("#fillcolor").show();
+                    } else {
+                        $("#fillcolor").attr("value", _color).hide();
+                    }
+                    vector.setStyle(getStyle());
+                });
+                //透明度，线的颜色，填充颜色，线条类型，线条宽度
+                $("input[name='linetype'], input[name='linewidth'], #islabel").on("change", function () {
+                    vector.setStyle(getStyle());
+                });
+                $("#opacity, #linecolor, #fillcolor").on("input propertychange", function () {
+                    vector.setStyle(getStyle());
+                });
+            });
+        }
+
+        function getStyle() {
+            var color = $("input[name='linecolor']:checked").val();
+            var fillColor = $("#fillcolor").val();
+            var opacity = $("#opacity").val();
+            if (color === "") {
+                color = $("#linecolor").val();
+            }
+            fillColor = fillColor.colorRgb();
+            var _fillColor = "RGBA(" + fillColor[0] + "," + fillColor[1] + "," + fillColor[2] + "," + opacity + ")";
+            var dash = $("input[name='linetype']:checked").val();
+            var width = parseInt($("input[name='linewidth']").val());
+            var _dash = dash === "true" ? 3 * width : 0;
+            var islabel = $("#islabel")[0].checked;
+            return function (feature, resolution) {
+                var name = feature.get("name");
+                var lblcolor = '#000000';
+                if (!islabel) lblcolor = 'rgba(0,0,0,0)';
+                return new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: color,
+                        lineDash: [_dash, _dash],
+                        width: width
+                    }),
+                    fill: new ol.style.Fill({
+                        color: _fillColor,
+                        opacity: opacity
+                    }),
+                    text: new ol.style.Text({
+                        text: name,
+                        fill: new ol.style.Fill({
+                            color: lblcolor
+                        })
+                    })
+                });
+            }
+        }
+    </script>
+</head>
+
+<body onLoad="init()">
+    <div id="map">
+        <div class="style-box">
+            <ul>
+                <li>
+                    <h5>
+                        <input type="checkbox" name="islabel" id="islabel">显示标注
+                    </h5>
+                </li>
+                <li>
+                    <h5>填充颜色：</h5>
+                    <input type="radio" name="fillcolor" value="#000000">黑色
+                    <input type="radio" name="fillcolor" value="#0000ff" checked="checked">蓝色
+                    <input type="radio" name="fillcolor" value="#ff0000">红色
+                    <input type="radio" name="fillcolor" value="">自定义
+                    <input type="color" id="fillcolor" value="#0000ff" style="display: none;" />
+                </li>
+                <li>
+                    <h5>填充透明度：</h5>
+                    <input type="number" id="opacity" value="0.3" min="0" max="1" step="0.1" style="width: 100%;">
+                </li>
+                <li>
+                    <h5>线条颜色：</h5>
+                    <input type="radio" name="linecolor" value="#000000">黑色
+                    <input type="radio" name="linecolor" value="#0000ff" checked="checked">蓝色
+                    <input type="radio" name="linecolor" value="#ff0000">红色
+                    <input type="radio" name="linecolor" value="">自定义
+                    <input type="color" id="linecolor" value="#0000ff" style="display: none;" />
+                </li>
+                <li>
+                    <h5>线条类型：</h5>
+                    <input type="radio" name="linetype" value="false">实线
+                    <input type="radio" name="linetype" value="true" checked="checked">虚线
+                </li>
+                <li>
+                    <h5>线条宽度：</h5>
+                    <input type="number" name="linewidth" value="2" min="1" max="5" style="width: 100%;">
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

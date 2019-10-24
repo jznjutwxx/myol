@@ -1,0 +1,167 @@
+<!-- 随着缩放点大小变化 -->
+<script>
+    function styleFunction(feature) {
+        var _zoom = map.getView().getZoom(),
+            _radius = _zoom * 2;
+
+        _radius = _radius < 2 ? 2 : _radius;
+        _radius = _radius > 15 ? 15 : _radius;
+
+        return new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: _radius,
+                fill: new ol.style.Fill({
+                    color: '#ff0000'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 2
+                })
+            })
+        })
+    }
+</script>
+
+<!-- 级别>4的时候出现标注 -->
+<script>
+    function styleFunction(feature) {
+        var _zoom = map.getView().getZoom(),
+            _radius = _zoom * 2;
+
+        _radius = _radius < 2 ? 2 : _radius;
+        _radius = _radius > 15 ? 15 : _radius;
+
+        var _attr = feature.get("attribute");
+        var _count = _zoom < 5 ? "" : _attr.count;
+
+        return new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: _radius,
+                fill: new ol.style.Fill({
+                    color: '#ff0000'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 2
+                })
+            }),
+            text: new ol.style.Text({
+                text: _count.toString(),
+                font: "bold 12px Times New Roman",
+                fill: new ol.style.Fill({
+                    color: '#fff'
+                })
+            })
+        })
+    }
+</script>
+
+<!-- 样式组合 -->
+<script>
+    function styleFunction(feature) {
+        var styles = [];
+
+        styles.push(
+            new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: '#ff0000'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#ff0000',
+                        width: 2
+                    })
+                })
+            })
+        );
+
+        styles.push(
+            new ol.style.Style({
+                geometry: feature.getGeometry(),
+                image: new ol.style.RegularShape({
+                    radius1: 10,
+                    radius2: 5,
+                    points: 8,
+                    fill: new ol.style.Fill({
+                        color: '#fff'
+                    })
+                })
+            })
+        );
+
+        return styles;
+    }
+</script>
+
+<!-- 展示线的节点 -->
+<script>
+    function styleFunction(feature) {
+        var styles = [];
+
+        styles.push(
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 4
+                })
+            })
+        );
+
+        var _coords = feature.get("geometry").getCoordinates();
+        for (var i = 0; i < _coords.length; i++) {
+            styles.push(
+                new ol.style.Style({
+                    geometry: new ol.geom.Point(_coords[i]),
+                    image: new ol.style.Circle({
+                        radius: 4,
+                        fill: new ol.style.Fill({
+                            color: '#ffff'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#ff0000',
+                            width: 2
+                        })
+                    })
+                })
+            );
+        }
+
+        return styles;
+    }
+</script>
+
+<!-- 带箭头的线 -->
+<script>
+    function styleFunction(feature) {
+        var styles = [];
+
+        styles.push(
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 4
+                })
+            })
+        );
+
+        var geometry = feature.get("geometry");
+        geometry.forEachSegment(function (start, end) {
+            var dx = end[0] - start[0];
+            var dy = end[1] - start[1];
+            var rotation = Math.atan2(dy, dx);
+            // arrows
+            styles.push(new ol.style.Style({
+                geometry: new ol.geom.Point(end),
+                image: new ol.style.Icon({
+                    src: '../data/arrow.png',
+                    anchor: [0.75, 0.5],
+                    rotateWithView: false,
+                    rotation: -rotation
+                })
+            }));
+        });
+
+        return styles;
+    }
+</script>

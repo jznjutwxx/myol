@@ -1,0 +1,79 @@
+<script>
+    $.get("../data/poets.json", function (result) {
+        var markers = result.Traces[0]["Markers"];
+        console.log(markers);
+        var features = [];
+        for (var i = 0, len = markers.length; i < len; i++) {
+            var marker = markers[i];
+            var geom = new ol.geom.Point([marker.Longitude, marker.Latitude]);
+            geom.transform('EPSG:4326', 'EPSG:3857');
+            var feature = new ol.Feature({
+                geometry: geom,
+                detail: marker.Detail,
+                title: marker.Title,
+                uri: marker.RequestUri
+            });
+            features.push(feature);
+        }
+        var vectorSource = new ol.source.Vector({
+            features: features
+        });
+        var vector = new ol.layer.Vector({
+            source: vectorSource,
+            style: function (feature, res) {
+                var title = feature.get("title");
+                return new ol.style.Style({
+                    image: new ol.style.Icon({
+                        anchor: [0, 0],
+                        src: "img/red.png"
+                    }),
+                    text: new ol.style.Text({
+                        text: title,
+                        offsetX: 15,
+                        offsetY: 30,
+                        textAlign: "center",
+                        fill: new ol.style.Fill({
+                            color: '#ffffff'
+                        }),
+                        stroke: new ol.style.Stroke({
+                            color: '#0000ff',
+                            width: 2
+                        })
+                    })
+                })
+            }
+        });
+        map.addLayer(vector);
+
+        var select = new ol.interaction.Select({
+            condition: ol.events.condition.click
+        });
+        map.addInteraction(select);
+
+        var container = document.getElementById('popup');
+        var content = document.getElementById('popup-content');
+        var title = document.getElementById('popup-title');
+        var closer = document.getElementById('popup-closer');
+        closer.onclick = function () {
+            container.style.display = 'none';
+            closer.blur();
+            return false;
+        };
+        var overlay = new ol.Overlay({
+            element: container
+        });
+        map.addOverlay(overlay);
+
+        select.on('select', function (e) {
+            var feature = e.target.getFeatures().item(0);
+            var coordinate = feature.getGeometry().getCoordinates();
+            overlay.setPosition(coordinate);
+            //districtname,districtcode,latitude,longitude,name,address,picinfo  
+            $(content).html("").append(feature.get("detail"));
+            container.style.display = 'block';
+            title.innerHTML = feature.get("title");
+            title.style.display = 'block';
+            map.getView().setCenter(coordinate);
+        });
+    });
+</script>

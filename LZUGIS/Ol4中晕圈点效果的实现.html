@@ -1,0 +1,417 @@
+<!-- 结合Openlayers4中的overlay，以图片作为晕圈背景，实现晕圈的点效果 -->
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>OL晕圈效果</title>
+    <link rel="stylesheet" href="../lib/ol.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <style type="text/css">
+        body,
+        #map {
+            border: 0px;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            font-size: 13px;
+            overflow: hidden;
+        }
+
+        .radius-overlay {
+            position: absolute;
+            width: 118px;
+            height: 118px;
+            zoom: .5;
+        }
+
+        .radius-overlay.level1 {
+            background: url("image/level-1.png");
+        }
+
+        .radius-overlay.level2 {
+            background: url("image/level-2.png");
+        }
+
+        .radius-overlay.level3 {
+            background: url("image/level-3.png");
+        }
+
+        .radius-overlay.level4 {
+            background: url("image/level-4.png");
+        }
+
+        .radius-overlay.level5 {
+            background: url("image/level-5.png");
+        }
+
+        .radius-overlay.level6 {
+            background: url("image/level-6.png");
+        }
+
+        .radius-overlay span {
+            display: block;
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 110px;
+            left: 44px;
+            top: 44px;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .radius-overlay span.level1 {
+            background: #00e428;
+        }
+
+        .radius-overlay span.level2 {
+            background: #ff0;
+        }
+
+        .radius-overlay span.level3 {
+            background: #ff7e00;
+        }
+
+        .radius-overlay span.level4 {
+            background: #f00;
+        }
+
+        .radius-overlay span.level5 {
+            background: #99004c;
+        }
+
+        .radius-overlay span.level6 {
+            background: #7e0023;
+        }
+
+        .city-name {
+            position: absolute;
+            z-index: 5;
+            padding: 4px 10px;
+            text-align: center;
+            background: black;
+            opacity: .6;
+            box-shadow: 0px 0px 10px #cccccc;
+            font-family: "黑体";
+            font-weight: bold;
+            border-radius: 3px;
+        }
+
+        .city-name:before {
+            width: 0;
+            height: 0;
+            border-top: 50px solid transparent;
+            border-bottom: 50px solid transparent;
+        }
+
+        .city-name:after,
+        .city-name:before {
+            top: 100%;
+            border: solid transparent;
+            content: " ";
+            height: 0;
+            width: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .city-name:after {
+            border-top-color: black;
+            opacity: .6;
+            border-width: 6px;
+            left: 48%;
+            margin-left: -6px;
+        }
+
+        .city-name:before {
+            border-top-color: black;
+            opacity: .6;
+            border-width: 7px;
+            left: 48%;
+            margin-left: -7px;
+        }
+
+        .city-name span.level1 {
+            color: #00e428;
+
+        }
+
+        .city-name span.level2 {
+            color: #ff0;
+        }
+
+        .city-name span.level3 {
+            color: #ff7e00;
+        }
+
+        .city-name span.level4 {
+            color: #f00;
+        }
+
+        .city-name span.level5 {
+            color: #99004c;
+        }
+
+        .city-name span.level6 {
+            color: #7e0023;
+        }
+    </style>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script
+        src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL">
+    </script>
+
+    <script src="../lib/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript">
+        var map;
+
+        function init() {
+            var midnight = getGeoheyLayer("midnight");
+
+            map = new ol.Map({
+                controls: ol.control.defaults({
+                    attribution: false
+                }),
+                target: 'map',
+                layers: [midnight],
+                view: new ol.View({
+                    center: ol.proj.transform([104.214, 35.847], 'EPSG:4326', 'EPSG:3857'),
+                    zoom: 4
+                })
+            });
+
+            setTimeout(addOverlay, 1000);
+        }
+
+        function addOverlay() {
+            var data = [{
+                "name": "乌鲁木齐",
+                "lon": 87.576079,
+                "lat": 43.782225,
+                "level": 5
+            }, {
+                "name": "拉萨",
+                "lon": 91.163218,
+                "lat": 29.71056,
+                "level": 3
+            }, {
+                "name": "西宁",
+                "lon": 101.797439,
+                "lat": 36.593725,
+                "level": 5
+            }, {
+                "name": "兰州",
+                "lon": 103.584421,
+                "lat": 36.119175,
+                "level": 2
+            }, {
+                "name": "成都",
+                "lon": 104.035634,
+                "lat": 30.714315,
+                "level": 3
+            }, {
+                "name": "重庆",
+                "lon": 106.519225,
+                "lat": 29.479073,
+                "level": 3
+            }, {
+                "name": "贵阳",
+                "lon": 106.668183,
+                "lat": 26.457486,
+                "level": 2
+            }, {
+                "name": "昆明",
+                "lon": 102.726915,
+                "lat": 24.969568,
+                "level": 2
+            }, {
+                "name": "银川",
+                "lon": 106.167324,
+                "lat": 38.598593,
+                "level": 5
+            }, {
+                "name": "西安",
+                "lon": 108.967213,
+                "lat": 34.276221,
+                "level": 5
+            }, {
+                "name": "南宁",
+                "lon": 108.234036,
+                "lat": 22.748502,
+                "level": 5
+            }, {
+                "name": "海口",
+                "lon": 110.346274,
+                "lat": 19.97015,
+                "level": 4
+            }, {
+                "name": "广州",
+                "lon": 113.226755,
+                "lat": 23.183277,
+                "level": 6
+            }, {
+                "name": "长沙",
+                "lon": 112.947996,
+                "lat": 28.170082,
+                "level": 6
+            }, {
+                "name": "南昌",
+                "lon": 115.893762,
+                "lat": 28.652529,
+                "level": 4
+            }, {
+                "name": "福州",
+                "lon": 119.246798,
+                "lat": 26.070956,
+                "level": 1
+            }, {
+                "name": "台北",
+                "lon": 121.503585,
+                "lat": 25.008476,
+                "level": 4
+            }, {
+                "name": "杭州",
+                "lon": 120.183062,
+                "lat": 30.330742,
+                "level": 2
+            }, {
+                "name": "上海",
+                "lon": 121.449713,
+                "lat": 31.253514,
+                "level": 4
+            }, {
+                "name": "武汉",
+                "lon": 114.216652,
+                "lat": 30.579401,
+                "level": 4
+            }, {
+                "name": "合肥",
+                "lon": 117.262334,
+                "lat": 31.838495,
+                "level": 3
+            }, {
+                "name": "南京",
+                "lon": 118.805714,
+                "lat": 32.085164,
+                "level": 3
+            }, {
+                "name": "郑州",
+                "lon": 113.651151,
+                "lat": 34.746419,
+                "level": 5
+            }, {
+                "name": "济南",
+                "lon": 117.048354,
+                "lat": 36.608511,
+                "level": 4
+            }, {
+                "name": "石家庄",
+                "lon": 114.478253,
+                "lat": 38.033361,
+                "level": 5
+            }, {
+                "name": "太原",
+                "lon": 112.483119,
+                "lat": 37.798488,
+                "level": 5
+            }, {
+                "name": "呼和浩特",
+                "lon": 111.842856,
+                "lat": 40.895807,
+                "level": 6
+            }, {
+                "name": "天津",
+                "lon": 117.351108,
+                "lat": 38.925801,
+                "level": 5
+            }, {
+                "name": "沈阳",
+                "lon": 123.29626,
+                "lat": 41.801674,
+                "level": 2
+            }, {
+                "name": "长春",
+                "lon": 125.261357,
+                "lat": 43.982041,
+                "level": 6
+            }, {
+                "name": "哈尔滨",
+                "lon": 126.567056,
+                "lat": 45.693857,
+                "level": 3
+            }, {
+                "name": "北京",
+                "lon": 116.068297,
+                "lat": 39.892297,
+                "level": 6
+            }, {
+                "name": "香港",
+                "lon": 114.093184,
+                "lat": 22.428066,
+                "level": 2
+            }, {
+                "name": "澳门",
+                "lon": 113.552554,
+                "lat": 22.18471,
+                "level": 3
+            }];
+            data.forEach(function (_d) {
+                var _level = "level" + _d.level;
+                var _span = $("<span/>").addClass(_level).data("attr", _d);
+                var _overlayDom = $("<div/>").addClass("radius-overlay").addClass(_level).append(_span);
+                var _overlay = new ol.Overlay({
+                    element: _overlayDom[0],
+                    stopEvent: false
+                });
+                map.addOverlay(_overlay);
+                _overlay.setPosition(ol.proj.transform([_d.lon, _d.lat], "EPSG:4326", "EPSG:3857"));
+
+                _span.on("mouseover", function () {
+                    var _d = $(this).data("attr");
+                    var _cord = ol.proj.transform([_d.lon, _d.lat], "EPSG:4326", "EPSG:3857"),
+                        _srcn = map.getPixelFromCoordinate(_cord);
+                    var _name = _d.name,
+                        _level = _d.level;
+                    var _levelC = "level" + _d.level;
+                    var _span = $("<span/>").addClass(_levelC).html(_name + "(" + _level + ")");
+                    var _nameDom = $("<div/>").addClass("city-name").append(_span).css({
+                        "left": (_srcn[0] - _name.length * 2.5) + "px",
+                        "top": (_srcn[1] - 15) + "px"
+                    });
+                    map.getTargetElement().appendChild(_nameDom[0]);
+
+                });
+                _span.on("mouseout", function () {
+                    $(".city-name").remove();
+                })
+            });
+        }
+
+        function GetRandomNum(Min, Max) {
+            var Range = Max - Min;
+            var Rand = Math.random();
+            return (Min + Math.round(Rand * Range));
+        }
+
+        function getGeoheyLayer(lyr) {
+            var url = "https://s4.geohey.com/s/mapping/" + lyr +
+                "/all?z={z}&x={x}&y={y}&retina=&ak=MGUxMmI2ZTk4YTVhNDEzYmJhZDJkNDM3ZWI5ZDAwOGE";
+            var layer = new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                    url: url
+                })
+            });
+            return layer;
+        }
+    </script>
+</head>
+
+<body onLoad="init()">
+    <div id="map">
+    </div>
+</body>
+
+</html>

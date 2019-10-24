@@ -1,0 +1,65 @@
+<!-- 1、此处引用了一个FileSaver.js文件，文件地址为：https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js -->
+
+<script>
+    document.getElementById('export_map').addEventListener('click', function () {
+        map.once('postcompose', function (event) {
+            var canvas = event.context.canvas;
+            if (navigator.msSaveBlob) {
+                navigator.msSaveBlob(canvas.msToBlob(), 'map.png');
+            } else {
+                canvas.toBlob(function (blob) {
+                    saveAs(blob, 'map.png');
+                });
+            }
+        });
+        map.renderSync();
+    });
+</script>
+
+<!-- 跨域处理;
+
+1、天地图切片跨域
+
+在代码中添加crossOrigin: 'anonymous'即可，完整代码如下：
+
+function getTdtLayer(lyr){
+    var url = "http://t0.tianditu.com/DataServer?T="+lyr+"&X={x}&Y={y}&L={z}";
+    var layer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            crossOrigin: 'anonymous',
+            url:url
+        })
+    });
+    return layer;
+} -->
+
+
+
+<!-- 2、wms跨域
+
+wms的跨域需从Geoserver服务器端解决，具体解决方法如下：
+
+1）从http://central.maven.org/maven2/org/eclipse/jetty/jetty-servlets/下载对应的jar，比如geoserver2.9依赖的jetty版本号是9.2.13.v20150730，那么就下载该版本的jar。
+2）将下载好的 jetty-servlets-9.2.13.v20150730.jar 放到webapps/geoserver下的lib中。
+3） 配置下webapps/geoserver/web.xml。
+<filter>
+        <filter-name>cross-origin</filter-name>
+        <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>cross-origin</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+4）重启geoserver即可。
+同样，代码中加入crossOrigin: 'anonymous'即可，代码如下：
+var boundry = new ol.layer.Image({
+             source: new ol.source.ImageWMS({
+                 crossOrigin: 'anonymous',
+                 url: 'http://localhost:8080/geoserver/lzugis/wms',
+                 params: {'FORMAT': 'image/png',
+                     'VERSION': '1.1.1',
+                     STYLES: '',
+                     LAYERS: 'lzugis:boundry',
+                 }
+             })
+         }); -->
